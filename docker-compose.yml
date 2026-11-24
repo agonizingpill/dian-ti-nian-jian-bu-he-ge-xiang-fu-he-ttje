@@ -44,6 +44,8 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-lift_pass}
       JWT_SECRET: ${JWT_SECRET:-gb1066-demo-secret}
       REDIS_URL: redis://redis:6379/0
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-jc1066-internal}
+      REVIEW_TIMEOUT_SECONDS: ${REVIEW_TIMEOUT_SECONDS:-30}
       PYTHONUNBUFFERED: "1"
     ports:
       - "${BACKEND_PORT:-19265}:8000"
@@ -70,6 +72,9 @@ services:
       MYSQL_USER: ${MYSQL_USER:-lift_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-lift_pass}
       REDIS_URL: redis://redis:6379/0
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-jc1066-internal}
+      BACKEND_INTERNAL_URL: http://backend:8000
+      TREE_VARIANT: ${TREE_VARIANT:-baseline}
       PYTHONUNBUFFERED: "1"
     depends_on:
       db:

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/styles.css" />
 <link rel="stylesheet" href="/operations-evidence.css">
 <link rel="stylesheet" href="/casework.css">
+<link rel="stylesheet" href="/review-board.css">
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -43,6 +44,7 @@
         <button class="nav-item active" data-page="dashboard"><span>⌂</span>总览</button>
         <button class="nav-item" data-page="lifts"><span>▦</span>设备档案</button>
         <button class="nav-item" data-page="inspections"><span>◈</span>检验复核</button>
+        <button class="nav-item" data-page="review"><span>⇄</span>分流复核</button>
         <button class="nav-item" data-page="rechecks"><span>↺</span>复检与证书</button>
         <button class="nav-item" data-page="audit"><span>≡</span>审计轨迹</button>
       </nav>
@@ -53,6 +55,7 @@
       <div id="page-content"></div>
     </main>
   </section>
+  <script type="module" src="/review-board.js"></script>
   <script type="module" src="/app.js"></script>
 <script type="module" src="/operations-evidence.js"></script>
 <script type="module" src="/casework.js"></script>

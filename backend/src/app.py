@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, date
@@ -10,8 +11,10 @@ import redis
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import review_sessions
 from .casework_routes import router as operational_cases
 from .operations_evidence import router as operations_evidence
+from .review_routes import router as review_sessions_router, internal_router as review_internal_router
 from .auth import create_token, current_user, hash_password, require_roles
 from .db import connection, init_schema
 from .middlewares.request_context import AuditRequestMiddleware
@@ -21,14 +24,32 @@ from .utils.audit import log_action
 
 redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"), decode_responses=True)
 
+_sweeper_stop = threading.Event()
+
+
+def _sweeper_loop():
+    # 等满时限仍缺通道结果的送审单转人工；条件翻转幂等，重复扫描不会重复转人工
+    while not _sweeper_stop.is_set():
+        try:
+            review_sessions.sweep_expired()
+        except Exception:
+            pass
+        _sweeper_stop.wait(2)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_schema()
+    sweeper = threading.Thread(target=_sweeper_loop, name="review-timeout-sweeper", daemon=True)
+    sweeper.start()
     yield
+    _sweeper_stop.set()
 
 app = FastAPI(title="电梯年检不合格项复核", version="1.0.0", lifespan=lifespan)
 app.include_router(operational_cases)
 app.include_router(operations_evidence)
+app.include_router(review_sessions_router)
+app.include_router(review_internal_router)
 app.add_middleware(AuditRequestMiddleware)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
